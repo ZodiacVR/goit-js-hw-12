@@ -13,7 +13,7 @@ const refs = {
 const itemsPerPage = 15;
 let totalPages;
 let currentPage;
-let q;
+let searchQuery;
 let elemHeight;
 
 refs.loader.style.display = 'none';
@@ -34,9 +34,9 @@ const onSearchFormSubmit = async event => {
     refs.gallery.innerHTML = '';
     refs.btnLoadMore.classList.remove('is-visible');
 
-    q = event.currentTarget.elements.search_text.value.trim();
+    searchQuery = event.currentTarget.elements.search_text.value.trim();
 
-    if (q === '') {
+    if (searchQuery === '') {
       iziToast.error({
         title: 'Error',
         message: `Input cannot be empty!`,
@@ -52,7 +52,7 @@ const onSearchFormSubmit = async event => {
     showLoader();
     const {
       data: { hits: images },
-    } = await fetchPhotosByQuery(q, currentPage);
+    } = await fetchPhotosByQuery(searchQuery, currentPage);
 
     if (images.length === 0) {
       iziToast.error({
@@ -71,7 +71,11 @@ const onSearchFormSubmit = async event => {
     lightbox.refresh();
     currentPage += 1;
 
-    refs.btnLoadMore.classList.add('is-visible');
+    if (images.length < itemsPerPage) {
+      refs.btnLoadMore.classList.remove('is-visible');
+    } else {
+      refs.btnLoadMore.classList.add('is-visible');
+    }
 
     elemHeight = document
       .querySelector('.gallery-wrapper')
@@ -88,7 +92,7 @@ const onBtnLoadMoreClick = async () => {
     showLoader();
     const {
       data: { totalHits, hits: images },
-    } = await fetchPhotosByQuery(q, currentPage);
+    } = await fetchPhotosByQuery(searchQuery, currentPage);
 
     refs.gallery.insertAdjacentHTML('beforeend', galleryCardsTemplate(images));
     lightbox.refresh();
@@ -101,7 +105,6 @@ const onBtnLoadMoreClick = async () => {
 
     totalPages = Math.ceil(totalHits / itemsPerPage);
 
-    // Додаємо додаткову перевірку
     if (currentPage === totalPages || images.length < itemsPerPage) {
       iziToast.info({
         message: "We're sorry, but you've reached the end of search results.",
