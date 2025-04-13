@@ -94,14 +94,15 @@ const onBtnLoadMoreClick = async () => {
     lightbox.refresh();
 
     window.scrollBy({
-      top: elemHeight * 2, // Scroll down by 2 times the element height
+      top: elemHeight * 2,
       left: 0,
-      behavior: 'smooth', // Smooth scrolling
+      behavior: 'smooth',
     });
 
     totalPages = Math.ceil(totalHits / itemsPerPage);
 
-    if (currentPage === totalPages) {
+    // Додаємо додаткову перевірку
+    if (currentPage === totalPages || images.length < itemsPerPage) {
       iziToast.info({
         message: "We're sorry, but you've reached the end of search results.",
         position: 'topRight',
